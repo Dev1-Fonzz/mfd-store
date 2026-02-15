@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MFD Store</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>MFD Store Showcase</h1>
+    <div id="auth-buttons">
+      <button onclick="window.location='login.html'">Login</button>
+      <button onclick="window.location='register.html'">Register</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search Product..." />
+      <button onclick="searchProducts()">Search</button>
+    </div>
+
+    <div class="product-grid" id="productGrid">
+      <!-- Produk akan dimuat di sini -->
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/products.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', loadAllProducts);
+  </script>
+</body>
+</html>
