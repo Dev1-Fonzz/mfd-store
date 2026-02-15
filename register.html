@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Register - MFD Store</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Register Account</h2>
+    <form id="registerForm">
+      <input type="text" id="username" placeholder="Username (optional)"><br>
+      <input type="password" id="password" placeholder="Password" required><br>
+      <input type="text" id="phone" placeholder="Active Phone Number" required><br>
+      <input type="email" id="email" placeholder="Email (optional)"><br>
+      <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
