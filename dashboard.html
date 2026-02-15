@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - MFD Store</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Welcome, <span id="usernameDisplay"></span>!</h1>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <nav>
+    <button onclick="showSection('orders')">Order History</button>
+    <button onclick="showSection('cart')">Saved Cart</button>
+    <button onclick="window.location='index.html'">Continue Shopping</button>
+    <button onclick="deleteAccount()">Delete Account</button>
+  </nav>
+
+  <main id="content">
+    <div id="ordersSection" class="section hidden">
+      <h2>Order History</h2>
+      <div id="ordersList"></div>
+    </div>
+
+    <div id="cartSection" class="section hidden">
+      <h2>Saved Cart</h2>
+      <div id="cartItems"></div>
+      <button onclick="checkoutFromCart()">Checkout</button>
+    </div>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/orders.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const uac = localStorage.getItem('uac');
+      const username = localStorage.getItem('username');
+      if (!uac) window.location = 'login.html';
+      document.getElementById('usernameDisplay').textContent = username;
+      loadCart();
+      loadOrders();
+    });
+
+    function showSection(section) {
+      document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
+      document.getElementById(section + 'Section').classList.remove('hidden');
+    }
+
+    function logout() {
+      localStorage.removeItem('uac');
+      localStorage.removeItem('username');
+      window.location = 'index.html';
+    }
+  </script>
+</body>
+</html>
