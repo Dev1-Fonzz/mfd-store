@@ -3,92 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - MFD Store</title>
+  <title>Login • MFD Store</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
+      padding: 20px;
     }
-    .form-container {
+    .card {
       background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 400px;
-    }
-    .form-container h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #333;
-    }
-    input {
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
+      max-width: 420px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card-header {
+      background: #2575fc;
+      color: white;
+      text-align: center;
+      padding: 25px 20px;
+    }
+    .card-header h2 {
+      font-weight: 600;
+      font-size: 24px;
+      letter-spacing: 0.5px;
+    }
+    .card-body {
+      padding: 30px;
+    }
+    .input-group {      margin-bottom: 20px;
+      position: relative;
+    }
+    .input-group i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 14px 14px 14px 45px;
       border: 1px solid #ddd;
-      border-radius: 6px;
+      border-radius: 12px;
       font-size: 16px;
+      transition: all 0.3s;
+    }
+    .input-group input:focus {
+      border-color: #2575fc;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.2);
     }
     button {
       width: 100%;
-      padding: 12px;
-      background: #4CAF50;
+      padding: 14px;
+      background: #2575fc;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 12px;
       font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 10px;
+      transition: all 0.3s;
     }
-    button:hover {
-      background: #45a049;    }
+    button:hover:not(:disabled) {
+      background: #1a68e8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 117, 252, 0.3);
+    }
     button:disabled {
-      background: #cccccc;
+      background: #b0c4de;
       cursor: not-allowed;
+      transform: none;
     }
     .message {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 6px;
-      text-align: center;
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;      font-weight: 500;
       display: none;
+      animation: slideIn 0.4s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
     }
     .success { background: #d4edda; color: #155724; }
     .error { background: #f8d7da; color: #721c24; }
-    .link {
+    .footer-link {
       text-align: center;
-      margin-top: 15px;
-      display: block;
-      color: #007bff;
-      text-decoration: none;
+      margin-top: 20px;
+      font-size: 15px;
     }
-    .link:hover { text-decoration: underline; }
+    .footer-link a {
+      color: #2575fc;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+    .footer-link a:hover {
+      color: #1a68e8;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>Login Account</h2>
-    <form id="loginForm">
-      <input type="text" id="phone" placeholder="Nombor Telefon (cth: 0123456789)" required autocomplete="tel">
-      <input type="password" id="password" placeholder="Kata Laluan" required autocomplete="current-password">
-      <button type="submit" id="loginBtn">Login</button>
-    </form>
-    
-    <div id="message" class="message"></div>
-    
-    <a href="register.html" class="link">Belum ada akaun? Daftar di sini</a>
+  <div class="card">
+    <div class="card-header">
+      <h2><i class="fas fa-user-lock"></i> Login ke Akaun Anda</h2>
+    </div>
+    <div class="card-body">
+      <form id="loginForm">
+        <div class="input-group">
+          <i class="fas fa-phone"></i>
+          <input type="text" id="phone" placeholder="Nombor Telefon (cth: 0123456789)" required autocomplete="tel">
+        </div>
+        <div class="input-group">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="password" placeholder="Kata Laluan" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="loginBtn">
+          <i class="fas fa-sign-in-alt"></i> Login Sekarang
+        </button>
+      </form>
+      
+      <div id="message" class="message"></div>
+      
+      <div class="footer-link">        Belum ada akaun? <a href="register.html">Daftar di sini</a>
+      </div>
+    </div>
   </div>
 
-  <!-- CryptoJS untuk hash password -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script>
-    // Ganti dengan URL Web App anda
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfo4qOl_OhcYSjzvowY1Rqy9vFNCEJyeYYja_Jksw7eIvHh0KMvK9E2zcPUYo5XbXV/exec";
 
     function showMessage(text, isSuccess = true) {
@@ -97,6 +160,7 @@
       msgDiv.className = `message ${isSuccess ? 'success' : 'error'}`;
       msgDiv.style.display = 'block';
     }
+
     function hashPassword(password) {
       return CryptoJS.SHA256(password).toString();
     }
@@ -107,34 +171,21 @@
       const phone = document.getElementById('phone').value.trim();
       const password = document.getElementById('password').value;
       const btn = document.getElementById('loginBtn');
-      
-      // Validasi asas
+
       if (!/^\d{10,11}$/.test(phone)) {
         showMessage("Sila masukkan nombor telefon sah (10-11 digit)", false);
         return;
       }
-      
+
       btn.disabled = true;
-      btn.textContent = "Sedang login...";
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sedang login...';
       showMessage("Menghantar permintaan...", true);
 
       try {
         const hashedPass = hashPassword(password);
+        const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(hashedPass)}`;
         
-        const response = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'login',
-            phone: phone,
-            password: hashedPass
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        const response = await fetch(url);
         const data = await response.json();
 
         if (data.success) {
@@ -143,15 +194,15 @@
           showMessage("Login berjaya! Mengalihkan...", true);
           setTimeout(() => {
             window.location.href = 'dashboard.html';
-          }, 1000);
-        } else {
-          showMessage("Gagal login: " + (data.message || "Nombor atau kata laluan salah"), false);        }
+          }, 1200);        } else {
+          showMessage("Gagal login: " + (data.message || "Nombor atau kata laluan salah"), false);
+        }
       } catch (err) {
         console.error("Login error:", err);
-        showMessage("Ralat sistem: " + err.message + ". Sila cuba lagi.", false);
+        showMessage("Ralat sistem: Gagal sambung ke pelayan. Cuba sebentar lagi.", false);
       } finally {
         btn.disabled = false;
-        btn.textContent = "Login";
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login Sekarang';
       }
     });
   </script>
