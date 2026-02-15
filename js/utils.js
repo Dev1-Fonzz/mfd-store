@@ -1,5 +1,2 @@
-// Ganti dengan URL Apps Script anda selepas deploy
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfo4qOl_OhcYSjzvowY1Rqy9vFNCEJyeYYja_Jksw7eIvHh0KMvK9E2zcPUYo5XbXV/exec";
-function hashPassword(password) {
-  return CryptoJS.SHA256(password).toString();
-}
+// 🌐 URL Web App MFD Store (Google Apps Script)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyW7xY61dFwr5bV8bjHzn_3Hx06xHPS9QJfTI3CV_BUC64Tbhj8rpVP2F77N5uJEeDR/exec";
