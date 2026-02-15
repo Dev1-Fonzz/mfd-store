@@ -13,28 +13,46 @@
       font-family: 'Segoe UI', system-ui, sans-serif;
     }
     body {
-      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-      min-height: 10 h;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 20px;
+      position: relative;
+      overflow: hidden;
     }
+
+    /* 🕒 Jam Digital */
+    .digital-clock {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
     .card {
-      background: white;
+      background: rgba(255, 255, 255, 0.95);
       width: 100%;
       max-width: 420px;
       border-radius: 20px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
       overflow: hidden;
       animation: fadeInUp 0.6s ease-out;
-    }
-    @keyframes fadeInUp {
+      z-index: 10;
+    }    @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .card-header {
-      background: #2575fc;
+      background: linear-gradient(to right, #1e3c72, #2a5298);
       color: white;
       text-align: center;
       padding: 25px 20px;
@@ -47,7 +65,8 @@
     .card-body {
       padding: 30px;
     }
-    .input-group {      margin-bottom: 20px;
+    .input-group {
+      margin-bottom: 20px;
       position: relative;
     }
     .input-group i {
@@ -55,7 +74,7 @@
       left: 15px;
       top: 50%;
       transform: translateY(-50%);
-      color: #777;
+      color: #555;
     }
     .input-group input {
       width: 100%;
@@ -66,26 +85,25 @@
       transition: all 0.3s;
     }
     .input-group input:focus {
-      border-color: #2575fc;
+      border-color: #2a5298;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.2);
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
     }
     button {
       width: 100%;
       padding: 14px;
-      background: #2575fc;
+      background: linear-gradient(to right, #1e3c72, #2a5298);
       color: white;
       border: none;
       border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 16px;      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
     }
     button:hover:not(:disabled) {
-      background: #1a68e8;
+      background: linear-gradient(to right, #1a335f, #234782);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(37, 117, 252, 0.3);
+      box-shadow: 0 4px 12px rgba(42, 82, 152, 0.3);
     }
     button:disabled {
       background: #b0c4de;
@@ -96,7 +114,8 @@
       margin-top: 20px;
       padding: 12px;
       border-radius: 10px;
-      text-align: center;      font-weight: 500;
+      text-align: center;
+      font-weight: 500;
       display: none;
       animation: slideIn 0.4s ease;
     }
@@ -112,18 +131,36 @@
       font-size: 15px;
     }
     .footer-link a {
-      color: #2575fc;
+      color: #2a5298;
       text-decoration: none;
       font-weight: 600;
       transition: color 0.3s;
     }
     .footer-link a:hover {
-      color: #1a68e8;
+      color: #1a335f;
       text-decoration: underline;
     }
+
+    /* Hiasan latar belakang */
+    .bg-decoration {
+      position: absolute;
+      width: 300px;
+      height: 300px;      border-radius: 50%;
+      background: radial-gradient(circle, rgba(42,82,152,0.1) 0%, transparent 70%);
+      z-index: 0;
+    }
+    .bg-1 { top: -100px; left: -100px; }
+    .bg-2 { bottom: -150px; right: -100px; width: 400px; height: 400px; }
   </style>
 </head>
 <body>
+  <!-- Hiasan latar -->
+  <div class="bg-decoration bg-1"></div>
+  <div class="bg-decoration bg-2"></div>
+
+  <!-- 🕒 Jam Digital -->
+  <div class="digital-clock" id="clock">Loading...</div>
+
   <div class="card">
     <div class="card-header">
       <h2><i class="fas fa-user-lock"></i> Login ke Akaun Anda</h2>
@@ -145,17 +182,26 @@
       
       <div id="message" class="message"></div>
       
-      <div class="footer-link">        Belum ada akaun? <a href="register.html">Daftar di sini</a>
+      <div class="footer-link">
+        Belum ada akaun? <a href="register.html">Daftar di sini</a>
       </div>
     </div>
   </div>
 
   <!-- CryptoJS -->
-  <script src="js/utils.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script>
-    // 🔑 PASTIKAN SAMA DENGAN register.html!
+    // 🔑 URL Web App Baharu
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyW7xY61dFwr5bV8bjHzn_3Hx06xHPS9QJfTI3CV_BUC64Tbhj8rpVP2F77N5uJEeDR/exec";
+
+    // 🕒 Fungsi Jam Digital    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('ms-MY');
+      const dateString = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock(); // Panggil segera
 
     function showMessage(text, isSuccess = true) {
       const msgDiv = document.getElementById('message');
@@ -170,16 +216,9 @@
 
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
       const phone = document.getElementById('phone').value.trim();
       const password = document.getElementById('password').value;
       const btn = document.getElementById('loginBtn');
-
-      // Validasi seperti register.html
-      if (!phone || !password) {
-        showMessage("Sila isi semua medan", false);
-        return;
-      }
 
       if (!/^\d{10,11}$/.test(phone)) {
         showMessage("Nombor telefon mesti 10-11 digit", false);
@@ -192,29 +231,28 @@
 
       try {
         const hashedPass = hashPassword(password);
-        
-        // 🔁 CARA HANTAR SAMA PERSIS DENGAN REGISTER.HTML
-        const urlParams = new URLSearchParams();
-        urlParams.append('action', 'login');        urlParams.append('phone', phone);
-        urlParams.append('password', hashedPass);
-        
-        const url = `${SCRIPT_URL}?${urlParams.toString()}`;
-        
-        const response = await fetch(url);
-        const data = await response.json();
+        const formData = new URLSearchParams();
+        formData.append('action', 'login');
+        formData.append('phone', phone);
+        formData.append('password', hashedPass);
 
-        if (data && data.success) {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+
+        const data = await response.json();
+        if (data.success) {
           localStorage.setItem('uac', data.uac);
           localStorage.setItem('username', data.username);
           showMessage("Login berjaya! Mengalihkan...", true);
-          setTimeout(() => {
-            window.location.href = 'dashboard.html';
-          }, 1200);
+          setTimeout(() => window.location.href = 'dashboard.html', 1200);
         } else {
-          showMessage("Gagal login: " + (data?.message || "Nombor atau kata laluan salah"), false);
+          showMessage("Gagal login: " + (data.message || "Nombor atau kata laluan salah"), false);
         }
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error("Login error:", err);
         showMessage("Ralat sistem: Gagal sambung ke pelayan.", false);
       } finally {
         btn.disabled = false;
