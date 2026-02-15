@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout - MFD Store</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="checkout-container">
+    <h2>Checkout</h2>
+    <div id="cartSummary"></div>
+
+    <h3>Shipping Address</h3>
+    <p id="shippingAddress">Loading...</p>
+
+    <h3>Payment Method</h3>
+    <select id="paymentMethod">
+      <option value="Sociabuzz">Online Payment (Sociabuzz)</option>
+      <option value="TNG">Touch 'n Go E-Wallet</option>
+    </select>
+
+    <p><strong>Total to Pay:</strong> RM<span id="totalAmount">0</span></p>
+
+    <button onclick="confirmPayment()">Confirm & Pay</button>
+    <button onclick="window.history.back()">Back</button>
+  </div>
+
+  <script src="js/cart.js"></script>
+  <script>
+    let cartItems = [];
+    let total = 0;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const uac = localStorage.getItem('uac');
+      if (!uac) window.location = 'login.html';
+
+      // Ambil cart dari localStorage atau fetch
+      const stored = localStorage.getItem('checkoutCart');
+      if (stored) {
+        cartItems = JSON.parse(stored);
+        renderCart();
+      } else {
+        window.location = 'dashboard.html';
+      }
+    });
+
+    function renderCart() {
+      let html = '<ul>';
+      total = 0;
+      cartItems.forEach(item => {
+        // Anda perlu fetch harga dari produk – untuk ringkas, kita anggap harga dalam item
+        // Dalam realiti, fetch Products sekali dan map
+        const price = item.sale_price || item.price || 0;
+        const lineTotal = price * item.qty;
+        total += lineTotal;
+        html += `<li>${item.name} x${item.qty} = RM${lineTotal.toFixed(2)}</li>`;
+      });
+      html += '</ul>';
+      document.getElementById('cartSummary').innerHTML = html;
+      document.getElementById('totalAmount').textContent = total.toFixed(2);
+    }
+
+    function confirmPayment() {
+      const method = document.getElementById('paymentMethod').value;
+      const amount = total.toFixed(2);
+      const uac = localStorage.getItem('uac');
+
+      if (method === 'TNG') {
+        alert(`Please pay RM${amount} to TNG: 161489981218\nThen contact admin via WhatsApp.`);
+        window.open('https://wa.me/60145400413?text=Hi%20MFD%2C%20I%20paid%20RM${amount}%20for%20my%20order.%20UAC:%20${uac}', '_blank');
+      } else {
+        window.open('https://sociabuzz.com/fareezonzz_019/give', '_blank');
+      }
+
+      // Simpan order ke backend
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'createOrder',
+          uac: uac,
+          items: JSON.stringify(cartItems),
+          total: total,
+          paymentMethod: method
+        })
+      }).then(r => r.json()).then(data => {
+        if (data.success) {
+          alert(`Order created! Tracking: ${data.trackingNumber}`);
+          localStorage.removeItem('checkoutCart');
+          window.location = 'dashboard.html';
+        } else {
+          alert('Failed to create order');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
