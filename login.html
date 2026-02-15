@@ -132,7 +132,7 @@
       <form id="loginForm">
         <div class="input-group">
           <i class="fas fa-phone"></i>
-          <input type="text" id="phone" placeholder="Nombor Telefon (cth: 012-345 6789)" required autocomplete="tel">
+          <input type="text" id="phone" placeholder="Nombor Telefon (cth: 0123456789)" required autocomplete="tel">
         </div>
         <div class="input-group">
           <i class="fas fa-lock"></i>
@@ -150,10 +150,10 @@
     </div>
   </div>
 
-  <!-- CryptoJS untuk hash password -->
+  <!-- CryptoJS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script>
-    // 🔑 GUNA URL WEB APP BAHARU ANDA
+    // 🔑 PASTIKAN SAMA DENGAN REGISTER.HTML!
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfo4qOl_OhcYSjzvowY1Rqy9vFNCEJyeYYja_Jksw7eIvHh0KMvK9E2zcPUYo5XbXV/exec";
 
     function showMessage(text, isSuccess = true) {
@@ -170,15 +170,11 @@
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      // 🔢 Bersihkan nombor telefon: hanya ambil digit
-      let rawPhone = document.getElementById('phone').value;
-      const phone = rawPhone.replace(/\D/g, ''); // Buang semua bukan-digit
-      
+      const phone = document.getElementById('phone').value.trim();
       const password = document.getElementById('password').value;
       const btn = document.getElementById('loginBtn');
 
-      // ✅ Validasi panjang nombor
-      if (phone.length < 10 || phone.length > 11) {
+      if (!/^\d{10,11}$/.test(phone)) {
         showMessage("Nombor telefon mesti 10-11 digit", false);
         return;
       }
@@ -190,13 +186,15 @@
       try {
         const hashedPass = hashPassword(password);
         
-        // 📝 Log untuk debug
-        console.log("📞 Nombor telefon (bersih):", phone);
-        console.log("🔑 Hash password:", hashedPass);
-
-        // 🌐 Hantar GET request        const url = `${SCRIPT_URL}?action=login&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(hashedPass)}`;
-        const response = await fetch(url);
-        const data = await response.json();
+        // 🔁 SAMA CARA HANTAR MACAM REGISTER.HTML
+        const params = new URLSearchParams({
+          action: 'login',
+          phone: phone,
+          password: hashedPass
+        });
+        const url = `${SCRIPT_URL}?${params.toString()}`;
+        
+        const response = await fetch(url);        const data = await response.json();
 
         if (data.success) {
           localStorage.setItem('uac', data.uac);
@@ -209,8 +207,8 @@
           showMessage("Gagal login: " + (data.message || "Nombor atau kata laluan salah"), false);
         }
       } catch (err) {
-        console.error("❌ Ralat login:", err);
-        showMessage("Ralat sistem: Gagal sambung ke pelayan.", false);
+        console.error("Login error:", err);
+        showMessage("Ralat sistem: Gagal sambung ke pelayan. Cuba sebentar lagi.", false);
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login Sekarang';
