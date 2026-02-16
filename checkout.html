@@ -1,28 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Checkout - MFD Store</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout • MFD Store</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="checkout-container">
-    <h2>Checkout</h2>
-    <div id="cartSummary"></div>
+  <div class="digital-clock" id="clock">Loading...</div>
+  <div class="container">
+    <div class="card">
+      <h2>💳 Checkout</h2>
+      <div id="cartSummary"></div>
 
-    <h3>Shipping Address</h3>
-    <p id="shippingAddress">Loading...</p>
+      <h3>📍 Alamat Penghantaran</h3>
+      <textarea id="shippingAddress" placeholder="Nama Penuh, No Rumah, Jalan, Poskod, Negeri, No Telefon" rows="3"></textarea>
 
-    <h3>Payment Method</h3>
-    <select id="paymentMethod">
-      <option value="Sociabuzz">Online Payment (Sociabuzz)</option>
-      <option value="TNG">Touch 'n Go E-Wallet</option>
-    </select>
+      <h3>💰 Kaedah Pembayaran</h3>
+      <select id="paymentMethod">
+        <option value="Sociabuzz">Online Payment (Sociabuzz)</option>
+        <option value="TNG">Touch 'n Go E-Wallet</option>
+      </select>
 
-    <p><strong>Total to Pay:</strong> RM<span id="totalAmount">0</span></p>
+      <div class="message" id="paymentInfo" style="display:block;margin:20px 0;">
+        <strong>ℹ️ Maklumat Pembayaran:</strong><br>
+        • Jika pilih TNG, bayar ke: <strong>161489981218</strong><br>
+        • Hantar bukti pembayaran ke WhatsApp: <a href="https://wa.me/60145400413" target="_blank" style="color:#4361ee;">+60145400413</a><br>
+        • Pesanan akan digantung jika tiada pembayaran dalam 24 jam
+      </div>
 
-    <button onclick="confirmPayment()">Confirm & Pay</button>
-    <button onclick="window.history.back()">Back</button>
+      <p><strong>jumlah Perlu Dibayar:</strong> RM<span id="totalAmount">0.00</span></p>
+
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        <button onclick="confirmPayment()">✅ Sahkan & Bayar</button>
+        <button onclick="window.history.back()" style="background:linear-gradient(to right,#64748b,#475569);">↩️ Kembali</button>
+      </div>
+    </div>
   </div>
 
   <script src="js/utils.js"></script>
@@ -31,30 +45,25 @@
     let cartItems = [];
     let total = 0;
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const uac = localStorage.getItem('uac');
-      if (!uac) window.location = 'login.html';
-
-      // Ambil cart dari localStorage atau fetch
+    document.addEventListener('DOMContentLoaded', () => {
       const stored = localStorage.getItem('checkoutCart');
-      if (stored) {
-        cartItems = JSON.parse(stored);
+      if (stored) {        cartItems = JSON.parse(stored);
         renderCart();
       } else {
         window.location = 'dashboard.html';
       }
+      updateClock();
+      setInterval(updateClock, 1000);
     });
 
     function renderCart() {
-      let html = '<ul>';
+      let html = '<h3>Item dalam Troli:</h3><ul style="list-style:none;padding:0;">';
       total = 0;
       cartItems.forEach(item => {
-        // Anda perlu fetch harga dari produk – untuk ringkas, kita anggap harga dalam item
-        // Dalam realiti, fetch Products sekali dan map
-        const price = item.sale_price || item.price || 0;
-        const lineTotal = price * item.qty;
+        const price = parseFloat(item.sale_price || item.price || 0);
+        const lineTotal = price * (item.qty || 1);
         total += lineTotal;
-        html += `<li>${item.name} x${item.qty} = RM${lineTotal.toFixed(2)}</li>`;
+        html += `<li style="padding:8px 0;border-bottom:1px solid #eee;">${item.name} x${item.qty || 1} = RM${lineTotal.toFixed(2)}</li>`;
       });
       html += '</ul>';
       document.getElementById('cartSummary').innerHTML = html;
@@ -62,36 +71,63 @@
     }
 
     function confirmPayment() {
+      const address = document.getElementById('shippingAddress').value.trim();
       const method = document.getElementById('paymentMethod').value;
-      const amount = total.toFixed(2);
       const uac = localStorage.getItem('uac');
 
-      if (method === 'TNG') {
-        alert(`Please pay RM${amount} to TNG: 161489981218\nThen contact admin via WhatsApp.`);
-        window.open('https://wa.me/60145400413?text=Hi%20MFD%2C%20I%20paid%20RM${amount}%20for%20my%20order.%20UAC:%20${uac}', '_blank');
-      } else {
-        window.open('https://sociabuzz.com/fareezonzz_019/give', '_blank');
+      if (!address) {
+        alert("Sila masukkan alamat penghantaran yang lengkap");
+        return;
       }
 
-      // Simpan order ke backend
+      // Simpan alamat ke akaun
       fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({
-          action: 'createOrder',
+        body: new URLSearchParams({
+          action: 'updateShippingAddress',
           uac: uac,
-          items: JSON.stringify(cartItems),
+          address: address
+        }),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+
+      // Cipta pesanan
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: new URLSearchParams({
+          action: 'createOrder',
+          uac: uac,          items: JSON.stringify(cartItems),
           total: total,
           paymentMethod: method
-        })
-      }).then(r => r.json()).then(data => {
+        }),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      })
+      .then(r => r.json())
+      .then(data => {
         if (data.success) {
-          alert(`Order created! Tracking: ${data.trackingNumber}`);
+          alert(`✅ Pesanan berjaya!\nNombor Tracking: ${data.trackingNumber}\n\nSila selesaikan pembayaran segera!`);
           localStorage.removeItem('checkoutCart');
           window.location = 'dashboard.html';
         } else {
-          alert('Failed to create order');
+          alert('❌ Gagal cipta pesanan: ' + data.message);
         }
+      })
+      .catch(err => {
+        console.error("Checkout error:", err);
+        alert("Ralat sistem: " + err.message);
       });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
+      const dateString = now.toLocaleDateString('ms-MY', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
     }
   </script>
 </body>
