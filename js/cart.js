@@ -1,9 +1,15 @@
 async function loadCart() {
   const uac = localStorage.getItem('uac');
-  const res = await fetch(`${SCRIPT_URL}?action=getCart&uac=${uac}`);
-  const data = await res.json();
-  if (data.success) {
-    displayCart(data.cart);
+  if (!uac) return;
+
+  try {
+    const response = await fetch(`${SCRIPT_URL}?action=getCart&uac=${uac}`);
+    const data = await response.json();
+    if (data.success) {
+      displayCart(data.cart);
+    }
+  } catch (err) {
+    console.error("Load cart error:", err);
   }
 }
 
@@ -12,26 +18,25 @@ function displayCart(cart) {
   if (!div) return;
 
   if (cart.length === 0) {
-    div.innerHTML = "<p>Your cart is empty.</p>";
+    div.innerHTML = "<p style='text-align:center;color:#64748b;'>Troli anda kosong.</p>";
     return;
   }
 
-  let html = '<ul>';
-  let total = 0;
+  let html = '<ul style="list-style:none;padding:0;">';
+  let totalItems = 0;
   cart.forEach(item => {
-    // Untuk demo, kita anggap item ada maklumat – dalam realiti, kena fetch Products
-    html += `<li>${item.item_id} x${item.qty}</li>`;
-    total += (item.qty || 0);
+    totalItems += (item.qty || 0);
+    html += `<li style="padding:12px 0;border-bottom:1px solid #eee;">${item.item_id} x${item.qty || 1}</li>`;
   });
   html += '</ul>';
-  html += `<p>Total Items: ${total}</p>`;
-  html += `<button onclick="checkoutFromCart()">Checkout</button>`;
+  html += `<p style="margin-top:16px;"><strong>Jumlah Item:</strong> ${totalItems}</p>`;
   div.innerHTML = html;
 }
 
 window.checkoutFromCart = function() {
   const uac = localStorage.getItem('uac');
-  // Untuk ringkas, kita hantar terus – dalam realiti, kena resolve nama/harga
+  if (!uac) return;
+
   fetch(`${SCRIPT_URL}?action=getCart&uac=${uac}`)
     .then(r => r.json())
     .then(data => {
@@ -39,7 +44,11 @@ window.checkoutFromCart = function() {
         localStorage.setItem('checkoutCart', JSON.stringify(data.cart));
         window.location = 'checkout.html';
       } else {
-        alert("Cart is empty");
+        alert("Troli kosong");
       }
+    })
+    .catch(err => {
+      console.error("Checkout error:", err);
+      alert("Ralat sistem: " + err.message);
     });
 };
