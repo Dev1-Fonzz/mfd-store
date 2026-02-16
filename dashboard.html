@@ -1,52 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard - MFD Store</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard • MFD Store</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>Welcome, <span id="usernameDisplay"></span>!</h1>
-    <button onclick="logout()">Logout</button>
-  </header>
+  <div class="digital-clock" id="clock">Loading...</div>
+  <div class="container">
+    <div class="navbar">
+      <h1>👋 Selamat Datang, <span id="usernameDisplay"></span>!</h1>
+      <button onclick="logout()" style="background:linear-gradient(to right,#ef4444,#b91c1c);">Logout</button>
+    </div>
 
-  <nav>
-    <button onclick="showSection('orders')">Order History</button>
-    <button onclick="showSection('cart')">Saved Cart</button>
-    <button onclick="window.location='index.html'">Continue Shopping</button>
-    <button onclick="deleteAccount()">Delete Account</button>
-  </nav>
+    <div class="card">
+      <h2>🎛️ Pengurusan Akaun</h2>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button onclick="showSection('orders')">📦 Sejarah Pesanan</button>
+        <button onclick="showSection('cart')">🛒 Troli Simpanan</button>
+        <button onclick="window.location='index.html'">🛍️ Teruskan Membeli</button>
+        <button onclick="deleteAccount()" style="background:linear-gradient(to right,#ef4444,#b91c1c);">🗑️ Padam Akaun</button>
+      </div>
+    </div>
 
-  <main id="content">
-    <div id="ordersSection" class="section hidden">
-      <h2>Order History</h2>
+    <div id="ordersSection" class="card hidden">
+      <h2>📦 Sejarah Pesanan</h2>
       <div id="ordersList"></div>
     </div>
 
-    <div id="cartSection" class="section hidden">
-      <h2>Saved Cart</h2>
+    <div id="cartSection" class="card hidden">
+      <h2>🛒 Troli Simpanan</h2>
       <div id="cartItems"></div>
-      <button onclick="checkoutFromCart()">Checkout</button>
+      <button onclick="checkoutFromCart()" style="margin-top:20px;">💳 Checkout Sekarang</button>
     </div>
-  </main>
+  </div>
 
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/cart.js"></script>
   <script src="js/orders.js"></script>
   <script>
+    let currentUAC = localStorage.getItem('uac');
+    let currentUsername = localStorage.getItem('username');
+
+    if (!currentUAC) window.location = 'login.html';
+
+    document.getElementById('usernameDisplay').textContent = currentUsername;
+
     document.addEventListener('DOMContentLoaded', () => {
-      const uac = localStorage.getItem('uac');
-      const username = localStorage.getItem('username');
-      if (!uac) window.location = 'login.html';
-      document.getElementById('usernameDisplay').textContent = username;
       loadCart();
       loadOrders();
+      updateClock();
+      setInterval(updateClock, 1000);
     });
 
     function showSection(section) {
-      document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.card').forEach(el => {
+        if (el.id && el.id.includes('Section')) el.classList.add('hidden');
+      });
       document.getElementById(section + 'Section').classList.remove('hidden');
     }
 
@@ -54,6 +67,18 @@
       localStorage.removeItem('uac');
       localStorage.removeItem('username');
       window.location = 'index.html';
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
+      const dateString = now.toLocaleDateString('ms-MY', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
     }
   </script>
 </body>
