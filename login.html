@@ -29,24 +29,89 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/auth.js"></script>
-  <script>
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    updateClock();
-    setInterval(updateClock, 1000);
+<script src="js/utils.js"></script>
+<script>
+  function showMessage(text, isSuccess = true) {
+    const msgDiv = document.getElementById('message');
+    msgDiv.textContent = text;
+    msgDiv.className = `message ${isSuccess ? 'success' : 'error'}`;
+    msgDiv.style.display = 'block';
+  }
+
+  function hashPassword(password) {
+    return CryptoJS.SHA256(password).toString();
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    function updateClock() {
-      const now = new Date();
-      const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
-      const dateString = now.toLocaleDateString('ms-MY', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-      document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('loginBtn');
+
+    // Validasi
+    if (!/^\d{10,11}$/.test(phone)) {
+      showMessage("Nombor telefon mesti 10-11 digit", false);
+      return;
     }
-  </script>
+    if (password.length < 6) {
+      showMessage("Kata laluan mesti sekurang-kurangnya 6 aksara", false);
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sedang login...';
+    showMessage("Menghantar permintaan...", true);
+
+    try {
+      const hashedPass = hashPassword(password);
+      
+      // 🔁 GUNA POST REQUEST (SAMA MACAM REGISTER)
+      const formData = new URLSearchParams();
+      formData.append('action', 'login');
+      formData.append('phone', phone);
+      formData.append('password', hashedPass);
+
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem('uac', data.uac);
+        localStorage.setItem('username', data.username);
+        showMessage("✅ Login berjaya! Mengalihkan...", true);
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1200);
+      } else {
+        showMessage("❌ Gagal login: " + (data.message || "Nombor atau kata laluan salah"), false);
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      showMessage("Ralat sistem: Gagal sambung ke pelayan.", false);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login Sekarang';
+    }
+  });
+
+  // Jam digital
+  function updateClock() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
+    const dateString = now.toLocaleDateString('ms-MY', { 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    });
+    document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+</script>
 </body>
 </html>
