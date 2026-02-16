@@ -6,6 +6,7 @@
   <title>Login • MFD Store</title>
   <link rel="stylesheet" href="css/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
   <div class="digital-clock" id="clock">Loading...</div>
@@ -21,97 +22,111 @@
           <label>Kata Laluan *</label>
           <input type="password" id="password" required placeholder="Kata laluan anda" />
         </div>
-        <button type="submit">🔓 Login Sekarang</button>
+        <button type="submit" id="loginBtn">
+          <i class="fas fa-sign-in-alt"></i> Login Sekarang
+        </button>
       </form>
       <div id="message" class="message"></div>
       <p>Belum ada akaun? <a href="register.html" style="color:#4361ee;">Daftar di sini</a></p>
     </div>
   </div>
 
+  <!-- CryptoJS untuk hash password -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<script src="js/utils.js"></script>
-<script>
-  function showMessage(text, isSuccess = true) {
-    const msgDiv = document.getElementById('message');
-    msgDiv.textContent = text;
-    msgDiv.className = `message ${isSuccess ? 'success' : 'error'}`;
-    msgDiv.style.display = 'block';
-  }
-
-  function hashPassword(password) {
-    return CryptoJS.SHA256(password).toString();
-  }
-
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const phone = document.getElementById('phone').value.trim();
-    const password = document.getElementById('password').value;
-    const btn = document.getElementById('loginBtn');
-
-    // Validasi
-    if (!/^\d{10,11}$/.test(phone)) {
-      showMessage("Nombor telefon mesti 10-11 digit", false);
-      return;
-    }
-    if (password.length < 6) {
-      showMessage("Kata laluan mesti sekurang-kurangnya 6 aksara", false);
-      return;
+  <!-- URL Web App -->
+  <script src="js/utils.js"></script>
+  <script>
+    // Fungsi papar mesej
+    function showMessage(text, isSuccess = true) {
+      const msgDiv = document.getElementById('message');
+      msgDiv.textContent = text;
+      msgDiv.className = `message ${isSuccess ? 'success' : 'error'}`;
+      msgDiv.style.display = 'block';
     }
 
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sedang login...';
-    showMessage("Menghantar permintaan...", true);
-
-    try {
-      const hashedPass = hashPassword(password);
+    // Hash password
+    function hashPassword(password) {
+      return CryptoJS.SHA256(password).toString();
+    }
+    // Handler login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-      // 🔁 GUNA POST REQUEST (SAMA MACAM REGISTER)
-      const formData = new URLSearchParams();
-      formData.append('action', 'login');
-      formData.append('phone', phone);
-      formData.append('password', hashedPass);
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
 
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        localStorage.setItem('uac', data.uac);
-        localStorage.setItem('username', data.username);
-        showMessage("✅ Login berjaya! Mengalihkan...", true);
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 1200);
-      } else {
-        showMessage("❌ Gagal login: " + (data.message || "Nombor atau kata laluan salah"), false);
+      // Validasi
+      if (!/^\d{10,11}$/.test(phone)) {
+        showMessage("Nombor telefon mesti 10-11 digit", false);
+        return;
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      showMessage("Ralat sistem: Gagal sambung ke pelayan.", false);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login Sekarang';
-    }
-  });
+      if (password.length < 6) {
+        showMessage("Kata laluan mesti sekurang-kurangnya 6 aksara", false);
+        return;
+      }
 
-  // Jam digital
-  function updateClock() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
-    const dateString = now.toLocaleDateString('ms-MY', { 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sedang login...';
+      showMessage("Menghantar permintaan...", true);
+
+      try {
+        const hashedPass = hashPassword(password);
+        
+        // 🔁 SAMA CARA HANTAR DENGAN REGISTER.HTML
+        const formData = new URLSearchParams();
+        formData.append('action', 'login');
+        formData.append('phone', phone);
+        formData.append('password', hashedPass);
+
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        });
+
+        // Tambah log untuk debug
+        console.log("Response status:", response.status);
+        console.log("Response OK:", response.ok);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Response data:", data);
+        if (data.success) {
+          localStorage.setItem('uac', data.uac);
+          localStorage.setItem('username', data.username);
+          showMessage("✅ Login berjaya! Mengalihkan...", true);
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 1200);
+        } else {
+          showMessage("❌ Gagal login: " + (data.message || "Nombor atau kata laluan salah"), false);
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        showMessage("Ralat sistem: " + err.message, false);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login Sekarang';
+      }
     });
-    document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
-  }
-  updateClock();
-  setInterval(updateClock, 1000);
-</script>
+
+    // Jam digital
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
+      const dateString = now.toLocaleDateString('ms-MY', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      });
+      document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
 </body>
 </html>
