@@ -3,35 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MFD Store</title>
+  <title>MFD Store • Showcase</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <header>
-    <h1>MFD Store Showcase</h1>
-    <div id="auth-buttons">
-      <button onclick="window.location='login.html'">Login</button>
-      <button onclick="window.location='register.html'">Register</button>
-    </div>
-  </header>
-
-  <main>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Search Product..." />
-      <button onclick="searchProducts()">Search</button>
+  <div class="digital-clock" id="clock">Loading...</div>
+  <div class="container">
+    <div class="navbar">
+      <h1>✨ MFD Store</h1>
+      <div>
+        <a href="login.html">Login</a>
+        <a href="register.html" style="margin-left:10px;">Register</a>
+      </div>
     </div>
 
-    <div class="product-grid" id="productGrid">
-      <!-- Produk akan dimuat di sini -->
+    <div class="card">
+      <h2>🛍️ Produk Terkini</h2>
+      <div class="form-group">
+        <input type="text" id="searchInput" placeholder="Cari produk..." />
+      </div>
+      <div class="product-grid" id="productGrid">
+        <!-- Produk akan dimuat di sini -->
+      </div>
     </div>
-  </main>
+  </div>
 
-  <script src="js/utils.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/products.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', loadAllProducts);
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAllProducts();
+      updateClock();
+      setInterval(updateClock, 1000);
+      
+      // Live search
+      document.getElementById('searchInput').addEventListener('input', searchProducts);
+    });
+
+    function updateClock() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('ms-MY', { hour12: false });
+      const dateString = now.toLocaleDateString('ms-MY', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      document.getElementById('clock').innerHTML = `${timeString}<br>${dateString}`;
+    }
   </script>
 </body>
 </html>
